@@ -1,0 +1,28 @@
+1. Ако няма jdk1.8.0_271трябва да се инсталира - изтегли файла оттук: \\FS02\Department Shares\Transfer All - jdk-8u271-windows-x64 1.exe
+
+2. От CMD(трябва да се пусне като администратор) се отива в директория - cd C:\Program Files\Java\jdk1.8.0_271\bin
+
+3. Изпълняват се следните команди:
+
+set JAVA_HOME=C:\Program Files\Java\jdk1.8.0_271\ 
+
+set ORACLE_HOME=C:\Oracle\Middleware\Oracle_Home2\  
+
+
+4. Копира се папка p28186730_1394215_Generic(1), от следния адрес - \\FS02\Department Shares\Transfer All
+
+5. Променя се пътя на кода, за да съотвества на локацията, на която е качена папката от предходната стъпка и се стартира:
+java -jar C:\Users\c8508561\Data\Patch\p28186730_1394215_Generic(1)\6880880\opatch_generic.jar    -silent oracle_home=C:\Oracle\Middleware\Oracle_Home2 - като след Users трябва да е вашето AD,  OracleHome2 при нас сочи към новото студио, при вас може да е друго, проверете го.
+
+6. Копира се папка  36487966, от следния адрес - \\FS02\Department Shares\Transfer All
+
+6.1 Отива се в изтеглената папка - смени пътя:
+cd C:\Users\c4046504\Desktop\DSK_IG\ODI\BUNDLE_PATCHES\p28186730_1394215_Generic(1)\36487966 - като след Users трябва да е вашето AD
+
+7. В тази директория(36487966)  се стартира следната заявка - C:\Oracle\Middleware\Oracle_Home2\OPatch\opatch.bat apply - OracleHome2 при нас сочи към новото студио, при вас може да е друго, проверете го.
+
+8. След приключване на стъпка 7, в същата директория се стартира  C:\Oracle\Middleware\Oracle_Home2\OPatch\opatch.bat lsinv - OracleHome2 при нас сочи към новото студио, при вас може да е друго, проверете го.
+проверка на пача 
+
+9. ЗАДЪЛЖИТЕЛНО ЧИСТЕНЕ НА КЕША ПРЕДИ ЛОГВАНЕ В ODI студиото - триене на цялата директория C:\Users\AD_USER\AppData\Roaming\odi\system12.2.1.4.0 
+AD_USER се заменя с потребителя от АД.
