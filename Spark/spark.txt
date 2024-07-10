@@ -1,0 +1,80 @@
+/usr/lib/spark
+
+./bin/spark-shell --master spark://bigdatalite.localdomain:7077
+
+import org.apache.spark.sql.SparkSession
+val spark:SparkSession = SparkSession.builder().master("local[1]").appName("SparkByExamples.com").getOrCreate()
+val columns = Seq("language","users_count")
+val data = Seq(("Java", "20000"), ("Python", "100000"), ("Scala", "3000"))
+val rdd = spark.sparkContext.parallelize(data)
+
+import spark.implicits._
+val dfFromRDD1 = rdd.toDF()
+dfFromRDD1.show()
+
+--------------------------------------
+
+val df2 = spark.read.csv("C:/1/visits.txt")
+val df2 = spark.read.text("C:/1/visits.txt")
+
+-------------------------------------------
+
+import java.sql.Types
+import org.apache.spark.sql.types._
+import org.apache.spark.sql.execution.datasources.jdbc.JdbcUtils
+import org.apache.spark.sql.jdbc.{ JdbcDialects, JdbcType, JdbcDialect }
+val url= "jdbc:oracle:thin:@192.168.1.100:1521/DSKDWH"
+
+--------------------------------------------------------
+--------------------------------------------------------
+
+import org.apache.spark.sql.SaveMode
+
+val db_user = "zhelev"
+val db_connect_string = "192.168.1.100:1521/dskdwh" // dbserver:port/service_name
+val db_pass = "cuk123"
+val myquery = "select * from visits"
+
+val df = spark.read.format("jdbc").
+           option("url", s"jdbc:oracle:thin:@$db_connect_string").
+           option("driver", "oracle.jdbc.driver.OracleDriver").
+           option("query", myquery).
+           // option("dbtable", "(select * ....)"). // enclosing the query in parenthesis it's like query mode
+           // option("dbtable", "myschema.mytable"). // use this to simply extract a given table 
+           option("user", db_user).
+           option("password", db_pass).
+           option("fetchsize", 10000).
+           load()
+
+df.printSchema
+df.show(5)
+// write the Spark DataFrame as (snappy compressed) Parquet files  
+df.write.parquet("c:/1/VISITS")
+
+-----------------------------------------------------------
+----------------------PATH---------------------------------
+
+%HADOOP_HOME%\bin
+C:\app\spark-3.5.1-bin-hadoop3\bin
+
+---------------------SYSTEM VAR----------------------------
+
+SPARK_HOME
+C:\app\spark-3.5.1-bin-hadoop3
+
+HADOOP_HOME
+C:\app\spark-3.5.1-bin-hadoop3
+
+-----------------------------------------------------------
+
+copy hadoop.dll to C:\Windows\System32 !!!!
+
+-----------------------------------------------------------
+
+spark.sql("SELECT * FROM zhelev.visits").show()
+
+df.write.mode("overwrite").format("parquet").save("c://1/visit1")
+
+df.write.format('parquet').mode('overwrite').saveAsTable('C:\1\VISIT1')  # don't forget the quotes nestava
+
+df.write.format("parquet").saveAsTable(VIS1)
