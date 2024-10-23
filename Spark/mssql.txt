@@ -1,0 +1,16 @@
+mssql-jdbc-12.6.3.jre8
+
+net.sourceforge.jtds.jdbc.Driver
+
+jdbc:jtds:sqlserver://10.1.38.250:1433;DatabaseName=dsk_report_messaging;columnEncryptionSetting=Enabled;integratedSecurity=true;encrypt=true;trustServerCertificate=true
+
+com.microsoft.sqlserver.jdbc.internals.TDS.TOKEN
+
+Discarding extra metadata which can be a result of SHOWPLAN settings:  TDS_COLMETADATA (0x81)
+
+com.microsoft.sqlserver.jdbc.internals.TDS.TOKEN
+INFO: ConnectionID:6 ClientConnectionId: SQLServerConnection.supportsTransactions: Discarding extra metadata which can be a result of SHOWPLAN settings:  TDS_COLMETADATA (0x81)
+
+
+com.microsoft.sqlserver.jdbc.SQLServerDriver
+jdbc:sqlserver://10.1.38.250:1433;DatabaseName=dsk_report_messaging;columnEncryptionSetting=Enabled;integratedSecurity=false;encrypt=true;trustServerCertificate=true
