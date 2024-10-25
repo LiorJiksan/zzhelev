@@ -1,0 +1,399 @@
+/usr/lib/spark
+
+spark-class org.apache.spark.deploy.history.HistoryServer
+./bin/spark-shell --master spark://bigdatalite.localdomain:7077
+
+
+=============================================
+import org.apache.spark.sql.SparkSession
+val spark = SparkSession.builder().appName("Creating a Database in Spark SQL").config("spark.sql.warehouse.dir", "C:/Apache/apache_spark/Databases").enableHiveSupport().getOrCreate()
+spark.sql("CREATE DATABASE SPARKDWH")
+
+spark.sql("CREATE TABLE mytable (id INT, name STRING)")
+
+
+
+===================================================
+
+import org.apache.spark.sql.SparkSession
+val spark:SparkSession = SparkSession.builder().master("local[1]").appName("SparkByExamples.com").getOrCreate()
+val columns = Seq("language","users_count")
+val data = Seq(("Java", "20000"), ("Python", "100000"), ("Scala", "3000"))
+val rdd = spark.sparkContext.parallelize(data)
+
+import spark.implicits._
+val dfFromRDD1 = rdd.toDF()
+dfFromRDD1.show()
+
+--------------------------------------
+
+val df2 = spark.read.csv("C:/1/visits.txt")
+val df2 = spark.read.text("C:/1/visits.txt")
+
+-------------------------------------------
+
+import java.sql.Types
+import org.apache.spark.sql.types._
+import org.apache.spark.sql.execution.datasources.jdbc.JdbcUtils
+import org.apache.spark.sql.jdbc.{ JdbcDialects, JdbcType, JdbcDialect }
+val url= "jdbc:oracle:thin:@192.168.1.100:1521/DSKDWH"
+
+--------------------------------------------------------
+
+import org.apache.spark.sql.SaveMode
+
+val db_user = "stage"
+val db_connect_string = "10.100.1.23:1521/DWHDEV.dsk.grp" // dbserver:port/service_name
+val db_pass = "x"
+val myquery = "select * from STAGE.NOM_KBI_FILES"
+
+val df = spark.read.format("jdbc").
+           option("url", s"jdbc:oracle:thin:@$db_connect_string").
+           option("driver", "oracle.jdbc.driver.OracleDriver").
+           option("query", myquery).
+           // option("dbtable", "(select * ....)"). // enclosing the query in parenthesis it's like query mode
+           // option("dbtable", "myschema.mytable"). // use this to simply extract a given table 
+           option("user", db_user).
+           option("password", db_pass).
+           option("fetchsize", 10000).
+           load()
+
+df.printSchema
+df.show(5)
+// write the Spark DataFrame as (snappy compressed) Parquet files  
+df.write.parquet("c:/1/mainframe/")
+
+-----------------------------------------------------
+
+spark.sql("SELECT * FROM zhelev.visits").show()
+
+df.write.mode("overwrite").format("parquet").save("c://1/visit1")
+
+df.write.format('parquet').mode('overwrite').saveAsTable('C:\1\VISIT1')  # don't forget the quotes nestava
+
+df.write.format("parquet").saveAsTable(VIS1)
+
+-------------------------------------------------------------------------
+
+pyspark --packages io.delta:delta-core_2.12:0.8.0 --conf "spark.sql.catalog.spark_catalog=org.apache.spark.sql.delta.catalog.DeltaCatalog" --conf "spark.sql.extensions=io.delta.sql.DeltaSparkSessionExtension"
+
+df = spark.read.option("inferSchema", "true").option("header", "true").csv("C:/1/visits.txt")
+
+from pyspark.sql import SparkSession
+
+spark = SparkSession \
+.builder \
+.appName("Python Spark SQL basic example") \
+.config("spark.some.config.option", "some-value") \
+.getOrCreate()
+
+spark-shell --packages org.apache.iceberg:iceberg-spark3-runtime:0.13.0 --conf spark.sql.extensions=org.apache.iceberg.spark.extensions.IcebergSparkSessionExtensions --conf spark.sql.catalog.spark_catalog=org.apache.iceberg.spark.SparkSessionCatalog --conf spark.sql.catalog.spark_catalog.type=hive --conf spark.sql.catalog.local=org.apache.iceberg.spark.SparkCatalog --conf spark.sql.catalog.local.type=hadoop --conf spark.sql.catalog.local.warehouse=$PWD/warehouse
+
+pyspark --packages io.delta:delta-core_2.12:2.1.0 --conf spark.sql.extensions=io.delta.sql.DeltaSparkSessionExtension --conf spark.sql.catalog.spark_catalog=org.apache.spark.sql.delta.catalog.DeltaCatalog
+		 
+df = spark.read.format("csv").option("header", True).load("C:/1/*.csv")
+df.show()
+
+spark-submit --packages org.apache.spark:spark-sql-kafka-0-10_2.12:3.2.0 ~/PycharmProjects/Kafka/PySpark_Kafka_SSL.py
+
+df.write.format("delta").save("C:/1/visit_delta1")
+df.write.format("parquet").save("C:/1/visit_delta")
+
+----------------------------------------------------------------
+
+import org.apache.spark.sql.SaveMode
+
+val df = spark.read.format("parquet").load("C:/1/visit_delta/visits.parquet")
+val df = spark.read.format("csv").load("C:/1/visits.csv")
+val d1 = df.select("BULSTAT_OR_EGN", "NAME").where("BULSTAT_OR_EGN = '7604177827'").show()
+
+df.show()
+df.printSchema()
+
+spark-shell --packages org.apache.spark:spark-avro_2.12:3.5.1
+
+val df = spark.read.format("parquet").load("C:/1/visit_delta/visits.parquet")
+df.write.format("avro").save("C:/1/visits.avro")
+df.write.format("json").save("C:/1/visits.json")
+
+--------------------------------------------------------------
+
+--??
+
+spark-shell --packages io.delta:delta-core_2.12:2.2.0 --conf "spark.sql.extensions=io.delta.sql.DeltaSparkSessionExtension" --conf "spark.sql.catalog.spark_catalog=org.apache.spark.sql.delta.catalog.DeltaCatalog"
+
+import io.delta.tables._
+val df = spark.read.load("C:/1/mainframe/DWI403AA/DWI403AA.parquet")
+
+val builder = DeltaTable.create
+// Specify the schema of the table
+builder.addColumn("id", "INT")
+builder.addColumn("firstName", "STRING")
+builder.addColumn("middleName", "STRING")
+builder.addColumn("lastName", "STRING")
+builder.addColumn("gender", "STRING")
+builder.addColumn("birthDate", "TIMESTAMP")
+builder.addColumn("ssn", "STRING")
+builder.addColumn("salary", "INT")
+// Specify the partitioning of the table
+builder.partitionedBy("gender")
+// Specify the location of the table
+builder.location("C:/1/parquet/")
+// Specify some table properties
+builder.property("delta.appendOnly", "true")
+builder.property("delta.autoOptimize.autoCompact", "true")
+// Create the table
+builder.create()
+
+val df = spark.read.format("parquet").load("C:/1/parquet/visits.parquet")
+    df.write.format("delta").mode("overwrite").save("C:/1/parquet/")
+    df.write.format("delta").save("C:/1/mainframe/DWI403AA/delta.parquet")
+    df.write.format("avro").save("C:/1/mainframe/DWI403AA/visits.avro")
+    
+    df.write.format("delta").save("C:/1/mainframe/nom_kbi_files_delta")
+    df.write.format("deltasharing").save("C:/1/mainframe/nom_kbi_files_deltasharing")
+
+
+CREATE TABLE IF NOT EXISTS people (id INT, firstName STRING, middleName STRING, lastName STRING, gender STRING, birthDate TIMESTAMP, ssn STRING, salary INT)
+USING delta
+LOCATION 'C:/1/'
+
+-----------------------------------------------------
+
+SQLite: Qako
+
+val sqlContext = new org.apache.spark.sql.SQLContext(sc)
+val metaData = sqlContext.read.format("jdbc").options(Map("url" -> "jdbc:sqlite:/C:/CUPOLA/DB/MAINFRAME.db", "dbtable" -> "(SELECT * FROM nom_kbi_files) AS t")).load()
+metaData.show()
+
+
+----------------------------------------------------------------------------------
+---pyspark
+
+schema_dict = {"sample": {"columns": ["id", "date", "string", "integer"], "width" : [3, 8, 3, 4]}}
+
+import numpy as np
+
+input_path = "C:/1/mainframe/"
+df_dict = dict()
+for file in schema_dict.keys():
+    df = spark.read.text(input_path + file + ".txt")
+    start_list = np.cumsum([1] + schema_dict[file]["width"]).tolist()[:-1]
+    df_dict[file] = df.select([df.value.substr(start_list[i], schema_dict[file]["width"][i]).alias(schema_dict[file]["columns"][i]) for i in range(len(start_list))]).show()
+
+------------------------------------------------------------------------------------------
+
+schema_dict = {"kr161": {"columns": ["CUS_NUMB", "SCR_NUMB", "SEQ_NUMB", "FL_16101", "FL_16102", "FL_16103", "FL_16104", "FL_16105", "FL_16106", "FL_16107"], "width" : [16, 5, 5, 8, 8, 8, 4, 40, 8, 8]}}
+
+--scala
+
+
+val myDF = spark.sparkContext.textFile("kr161.txt").toDF()
+val myNewDF = myDF.withColumn("c1", substring(col("value"), 0, 3)).withColumn("c2", substring(col("value"), 4, 6)).withColumn("c3", substring(col("value"), 6, 9).withColumn("c4", substring(col("value"), 9, 12)).drop("value").show()
+val myNewDF = myDF.withColumn("c1", substring(col("value"), 0, 3)).withColumn("c2", substring(col("value"), 4, 6)).drop("value").show()
+
+val myNewDF = myDF.withColumn("c1", expr("substring(value, 0, 3)"))
+.withColumn("c2",  expr("substring(value, 3, 6"))
+.withColumn("c3", expr("substring(value, 6, 9)"))
+.withColumn("c4", (expr("substring(value, 9, 12)").cast("double") * 100))
+.drop("value")
+
+-----------------------------------------------------------------------------------------
+bin/spark-shell --driver-class-path /opt/sqljdbc_4.2/enu/sqljdbc42.jar
+
+val jdbcSqlConnStr = "jdbc:sqlserver://10.1.38.250:1433;databaseName=dsk_report_messaging;user=odi_user;password=!QAZ2wsx3edc;"
+val jdbcDbTable = "dbo.LOGCOMM"
+
+import org.apache.spark.sql.SaveMode
+
+val db_user = "odi_user"
+val db_connect_string = "10.1.38.250:1433/dsk_report_messaging" // dbserver:port/service_name
+val db_pass = "!QAZ2wsx3edc"
+val myquery = "select * from dbo.logcomm"
+
+val df = spark.read.format("jdbc").
+           option("url", s"jdbc:WEBLOGIC:sqlserver").
+           option("driver", "jdbc.sqlserver.SQLServerDriver").
+           option("query", myquery).
+           // option("dbtable", "(select * ....)"). // enclosing the query in parenthesis it's like query mode
+           // option("dbtable", "myschema.mytable"). // use this to simply extract a given table 
+           option("user", db_user).
+           option("password", db_pass).
+           option("fetchsize", 10000).
+           load()
+
+df.printSchema
+df.show(5)
+// write the Spark DataFrame as (snappy compressed) Parquet files  
+df.write.parquet("c:/1/mainframe/")
+
+bin/spark-shell --driver-class-path /opt/sqljdbc_4.2/enu/sqljdbc42.jar
+
+  val uri = "jdbc:jtds:sqlserver://10.1.38.250:1433/dsk_report_messaging"
+  val username = "odi_user"
+  val password = "!QAZ2wsx3edc"
+
+----------------------------------------
+jdbc:weblogic:sqlserver://10.1.38.250:1433;DatabaseName=dsk_report_messaging;columnEncryptionSetting=Enabled;integratedSecurity=true;encrypt=true;trustServerCertificate=true;authenticationScheme=NativePassword;SQLServerColumnEncryptionCertificateStoreProvider=MSSQL_CERTIFICATE_STORE;keyStoreLocation=CurrentUser/my/C279A136D2DB298A4D7A6DDA32C582EEF87364FA
+-------------------------------------------
+
+spark-shell --driver-class-path C:\Apache\apache_spark\jars\mssql-jdbc-12.8.1.jre11.jar --driver-class-path C:\Apache\apache_spark\jars\mssql-jdbc_auth-12.8.1.x64.dll
+
+import org.apache.spark.SparkContext
+
+val jdbcSqlConnStr = "jdbc:sqlserver://10.1.38.250:1433;databaseName=dsk_report_messaging;columnEncryptionSetting=Enabled;integratedSecurity=true;encrypt=true;trustServerCertificate=true;SQLServerColumnEncryptionCertificateStoreProvider=MSSQL_CERTIFICATE_STORE"
+val jdbcDbTable = "dbo.LOGCOMM"
+val jdbc_user = "odi_user"
+val jdbc_pass = "!QAZ2wsx3edc"
+val jdbc_myquery = "SELECT Message FROM dsk_report_messaging.dbo.LOGCOMM where Destination = '+359888355343' and date > '20231020'"
+
+val sqlContext = new org.apache.spark.sql.SQLContext(sc)
+
+val jdbcDF = sqlContext.read.format("jdbc").option("driver", "com.microsoft.sqlserver.jdbc.SQLServerDriver").option("url", jdbcSqlConnStr).option("dbtable", jdbcDbTable).option("user", jdbc_user).option("password", jdbc_pass).load()
+
+
+jdbcDF.show(5)
+
+----------------------------------------------
+---------------------------------------------------------
+
+val driver = "com.microsoft.sqlserver.jdbc.SQLServerDriver"
+
+val database_host = "10.1.38.250"
+val database_port = "1433"
+val database_name = "dsk_report_messaging"
+val table = "LOGCOMM"
+val user = "odi_user"
+val password = "!QAZ2wsx3edc"
+
+val url = s"jdbc:sqlserver://{database_host}:{database_port};database={database_name}"
+
+val remote_table = spark.read
+  .format("jdbc")
+  .option("driver", driver)
+  .option("url", url)
+  .option("dbtable", table)
+  .option("user", user)
+  .option("password", password)
+  .load()
+
+--------------------------------------------------------
+
+val remote_table = spark.read
+  .format("sqlserver")
+  .option("host", "10.1.38.250")
+  .option("port", "1433") 
+  .option("user", "odi_user")
+  .option("password", "!QAZ2wsx3edc")
+  .option("database", "dsk_report_messaging")
+  .option("dbtable", "schemaName.tableName") 
+  .load()
+
+---------------------------------
+
+spark-shell --driver-class-path C:\Apache\apache_spark\jars\sqljdbc42.jar;
+
+val sqlContext = new org.apache.spark.sql.SQLContext(sc)
+
+val jdbcSqlConnStr = "jdbc:sqlserver://10.1.38.250;databaseName=dsk_report_messaging;user=odi_user;password=!QAZ2wsx3edc;"
+
+val jdbcDbTable = "dbo.logcomm"
+
+val jdbcDF = sqlContext.read.format("jdbc").options(Map("url" -> jdbcSqlConnStr, "dbtable" -> jdbcDbTable)).load()
+
+val jdbcDF = sqlContext.read.format("jdbc").options(Map("url" -> jdbcSqlConnStr, "dbtable" -> ("SELECT TOP 10 Level, Channel, Destination, Message, Date FROM LOGCOMM where date > '20240908'").load()
+
+val jdbcDF = sqlContext.read.format("jdbc").options(Map("url" -> jdbcSqlConnStr, "dbtable" -> ("SELECT Level, Destination, Message, Date, FullMessage FROM dsk_report_messaging.dbo.LOGCOMM where Destination = '+359888355343' and date > '20231020'").load()
+val jdbcDF = sqlContext.read.format("jdbc").options(Map("url" -> jdbcSqlConnStr, "dbtable" -> ("SELECT Message FROM dsk_report_messaging.dbo.LOGCOMM where Destination = '+359888355343' and date > '20231020'").load()
+
+jdbcDF.show(5)
+
+
+
+---------------------------------------
+
+val df = sqlContext
+.read()
+.format("jdbc")
+.option("url", "jdbc:mssql://127.0.0.1:3306/test?useUnicode=true&characterEncoding=UTF-8&autoReconnect=true")
+.option("user", "root")
+.option("password", "password")
+.option("dbtable", sql)
+.schema(customSchema)
+.load();
+
+
+val jdbcDbTable = "SELECT TOP 10 Level, Channel, Destination, Message, Date FROM LOGCOMM where date > '20240908'"
+
+
+
+
+val cust = sqlContext.sql("SELECT Level, Channel, Destination, Message, Date FROM LOGCOMM")
+cust.show()
+
+val qry = sqlContext.sql("SELECT Level, Channel, Destination, Message, Date FROM LOGCOMM")
+
+qry.show(5)
+
+jdbcDF.show(5)
+
+jdbcDF.registerTempTable("Sales")
+
+val saleInvoices = sqlContext.sql("SELECT message from dbo.logcomm WHERE date > '20240908'")
+
+saleInvoices.show()
+
+============================================================
+
+spark-shell --driver-class-path C:\Apache\apache_spark\jars\mssql-jdbc-12.8.1.jre11.jar --driver-class-path C:\Apache\apache_spark\jars\mssql-jdbc_auth-12.8.1.x64.dll
+
+import org.apache.spark.SparkContext
+
+val jdbcSqlConnStr = "jdbc:sqlserver://10.1.38.250;databaseName=dsk_report_messaging;columnEncryptionSetting=Enabled;integratedSecurity=true;encrypt=true;trustServerCertificate=true;SQLServerColumnEncryptionCertificateStoreProvider=MSSQL_CERTIFICATE_STORE"
+val jdbcDbTable = "dbo.LOGCOMM"
+val jdbc_user = "odi_user"
+val jdbc_pass = "!QAZ2wsx3edc"
+val jdbc_myquery = "SELECT Message FROM dsk_report_messaging.dbo.LOGCOMM where Destination = '+359888355343' and date > '20231020'"
+
+val sqlContext = new org.apache.spark.sql.SQLContext(sc)
+
+--val jdbcDF = sqlContext.read.format("jdbc").option("driver", "com.microsoft.sqlserver.jdbc.SQLServerDriver").option("url", jdbcSqlConnStr).option("dbtable", jdbcDbTable).option("user", jdbc_user).option("password", jdbc_pass).option("query", jdbc_myquery).load()
+val jdbcDF = sqlContext.read.format("jdbc").option("driver", "com.microsoft.sqlserver.jdbc.SQLServerDriver").option("url", jdbcSqlConnStr).option("query", jdbc_myquery).option("user", jdbc_user).option("password", jdbc_pass).load()
+
+
+jdbcDF.show(5)
+
+jdbcDF.write.format("csv").save("C:/1/mainframe/logcom.csv")
+========================================================
+
+val jdbc_driver_path = "C:\Apache\apache_spark\jars\mssql-jdbc-12.8.1.jre11.jar"
+val auth_dll_path = "C:\Apache\apache_spark\jars\mssql-jdbc_auth-12.8.1.x64.dll"
+
+spark = SparkSession.builder.master("local[*]").appName("PySpark SQL Server Connection").config("spark.jars", jdbc_driver_path).config("spark.driver.extraClassPath", jdbc_driver_path).config("spark.driver.extraJavaOptions", f"-Djava.library.path={auth_dll_path}").getOrCreate()
+
+-------------------------------------------------------------
+
+spark-shell --driver-class-path C:\Apache\apache_spark\jars\mssql-jdbc-12.8.0.jre8.jar --driver-class-path C:\Apache\apache_spark\jars\mssql-jdbc_auth-12.8.0.x64.dll
+
+
+import org.apache.spark.SparkContext
+
+val jdbcSqlConnStr = "jdbc:sqlserver://10.1.38.250;databaseName=dsk_report_messaging;columnEncryptionSetting=Enabled;integratedSecurity=true;encrypt=true;trustServerCertificate=true;SQLServerColumnEncryptionCertificateStoreProvider=MSSQL_CERTIFICATE_STORE"
+val jdbcDbTable = "dbo.LOGCOMM"
+val jdbc_user = "odi_user"
+val jdbc_pass = "!QAZ2wsx3edc"
+val jdbc_myquery = "SELECT * FROM dsk_report_messaging.dbo.LOGCOMM"
+
+val sqlContext = new org.apache.spark.sql.SQLContext(sc)
+
+--val jdbcDF = sqlContext.read.format("jdbc").option("driver", "com.microsoft.sqlserver.jdbc.SQLServerDriver").option("url", jdbcSqlConnStr).option("dbtable", jdbcDbTable).option("user", jdbc_user).option("password", jdbc_pass).option("query", jdbc_myquery).load()
+val jdbcDF = sqlContext.read.format("jdbc").option("driver", "com.microsoft.sqlserver.jdbc.SQLServerDriver").option("url", jdbcSqlConnStr).option("query", jdbc_myquery).option("user", jdbc_user).option("password", jdbc_pass).load()
+
+
+jdbcDF.show(5)
+
+jdbcDF.write.format("delta").save("C:/1/mainframe/logcomm.parquet")
+jdbcDF.write.format("avro").save("C:/1/mainframe/logcomm.avro")
+
+jdbc:sqlserver://10.1.38.250:1433;DatabaseName=dsk_report_messaging;columnEncryptionSetting=Enabled;integratedSecurity=true;encrypt=true;trustServerCertificate=true
+
